@@ -74,6 +74,7 @@
     */ -->
 
     <script>
+        const PLAYER_STORAGE_KEY = 'LeAnh_Player'
         const $ = document.querySelector.bind(document)
         const $$ = document.querySelectorAll.bind(document)
         const cd = $('.cd')
@@ -96,6 +97,7 @@
             isPlaying: false,
             isRandom: false,
             isRepeat: false,
+            config: JSON.parse(localStorage.getItem(PLAYER_STORAGE_KEY)) || {},
             //List of songs downloaded from zingmp3
             songs: [
                 {
@@ -147,7 +149,21 @@
                     image: './assets/image/ViAnhDauCoBiet.jpg'
                 }
             ],
-
+            
+            //Lưu tùy chỉnh lại trong storage với key
+            setConfig: function(key, value) {
+                this.config[key] = value;
+                localStorage.setItem(PLAYER_STORAGE_KEY, JSON.stringify(this.config));
+            },
+            
+            //Load lại config và đổi màu các nút bấm
+            loadConfig: function() {
+                this.isRandom = this.config.isRandom
+                this.isRepeat = this.config.isRepeat
+                randomBtn.classList.toggle('active', this.isRandom)
+                repeatBtn.classList.toggle('active', this.isRepeat)
+            },
+            
             //Render html with data from list of songs
             render: function() {
                 const html = this.songs.map((song, index) => {
@@ -268,12 +284,14 @@
                 //Xử lý khi nhấn nút random
                 randomBtn.onclick = function() {
                     _this.isRandom = !_this.isRandom
+                    _this.setConfig('isRandom', _this.isRandom)
                     randomBtn.classList.toggle('active', _this.isRandom)
                 }
 
                 //Xử lý khi nhấn nút repeat
                 repeatBtn.onclick = function() {
                     _this.isRepeat = !_this.isRepeat
+                    _this.setConfig('isRepeat', _this.isRepeat)                   
                     repeatBtn.classList.toggle('active', _this.isRepeat)
                 }
 
@@ -352,6 +370,9 @@
             },
 
             start: function() {
+                //Load các config được lưu
+                this.loadConfig()
+                
                 //Định nghĩa các thuộc tính cho object
                 this.defineProperties()
                 //Xử lý các sự kiện
